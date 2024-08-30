@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../redux/Store";
-import { addProduct, addProductToHistory } from "../redux/slices/ProductSlice";
-import { toast } from "react-toastify";
-import styled from "styled-components";
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../redux/Store';
+import { addProduct, addProductToHistory } from '../redux/slices/ProductSlice';
+import { toast } from 'react-toastify';
+import styled from 'styled-components';
 
 const FormContainer = styled.div`
   padding: 20px;
@@ -68,10 +68,10 @@ const SubmitButton = styled.button`
 `;
 
 const AddProductPage: React.FC = () => {
-  const [title, setTitle] = useState("");
-  const [price, setPrice] = useState("");
-  const [image, setImage] = useState("");
-  const [category, setCategory] = useState("electronics");
+  const [title, setTitle] = useState('');
+  const [price, setPrice] = useState('');
+  const [image, setImage] = useState('');
+  const [category, setCategory] = useState('electronics');
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -86,10 +86,10 @@ const AddProductPage: React.FC = () => {
     };
     dispatch(addProduct(product));
     dispatch(addProductToHistory(product));
-    toast.success("Product added successfully");
-    setTitle("");
-    setPrice("");
-    setImage("");
+    toast.success('Product added successfully');
+    setTitle('');
+    setPrice('');
+    setImage('');
   };
 
   return (
@@ -144,4 +144,3 @@ const AddProductPage: React.FC = () => {
 };
 
 export default AddProductPage;
-

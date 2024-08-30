@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import styled from "styled-components";
-import { AppDispatch, RootState } from "../redux/Store";
-import { useDispatch, useSelector } from "react-redux";
-import { BsCart } from "react-icons/bs";
-import { setSearchTerm } from "../redux/slices/SearchSlice";
-import { Link } from "react-router-dom";
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import { AppDispatch, RootState } from '../redux/Store';
+import { useDispatch, useSelector } from 'react-redux';
+import { BsCart } from 'react-icons/bs';
+import { setSearchTerm } from '../redux/slices/SearchSlice';
+import { Link } from 'react-router-dom';
 
 const HeaderWrapper = styled.header`
   display: flex;
@@ -14,17 +14,33 @@ const HeaderWrapper = styled.header`
   background-color: #e8c995;
   box-shadow: 0 2px 4px #00000020;
   transition: background-color 0.3s ease;
+  position: relative;
+
+  @media (max-width: 768px) {
+    padding: 20px 15px;
+  }
 `;
 
 const Logo = styled.div`
+  display: flex;
+  align-items: center;
   font-size: 25px;
   font-weight: bold;
+
+  @media (max-width: 768px) {
+    font-size: 20px;
+  }
 `;
 
 const Nav = styled.nav`
   display: flex;
   gap: 10px;
   flex-grow: 1;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
 const SearchBar = styled.input`
@@ -32,17 +48,26 @@ const SearchBar = styled.input`
   border: 1px solid #cccccc;
   border-radius: 4px;
   width: 200px;
+
+  @media (max-width: 768px) {
+    width: 150px;
+  }
 `;
 
 const UserActions = styled.div`
   display: flex;
   gap: 10px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
 const StyledLink = styled(Link)`
   color: #333333;
   text-decoration: none;
-  margin: 5px 5px;
+  margin: 5px;
 
   &:hover {
     color: #555555;
@@ -60,6 +85,11 @@ const CartIcon = styled(BsCart)`
   &:hover {
     color: #555555;
   }
+
+  @media (max-width: 768px) {
+    font-size: 28px;
+    right: 20px;
+  }
 `;
 
 const CartItems = styled.span`
@@ -73,11 +103,21 @@ const CartItems = styled.span`
   padding: 2px 6px;
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+    padding: 1px 5px;
+  }
 `;
 
 const DropdownContainer = styled.div`
   position: relative;
   display: inline-block;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    text-align: center;
+  }
 `;
 
 const DropdownButton = styled.button`
@@ -92,10 +132,15 @@ const DropdownButton = styled.button`
   &:hover {
     text-decoration: underline;
   }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 12px 0;
+  }
 `;
 
 const DropdownMenu = styled.div<{ isOpen: boolean }>`
-  display: ${(props) => (props.isOpen ? "block" : "none")};
+  display: ${(props) => (props.isOpen ? 'block' : 'none')};
   position: absolute;
   top: 100%;
   left: 0;
@@ -105,6 +150,12 @@ const DropdownMenu = styled.div<{ isOpen: boolean }>`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   width: 200px;
   z-index: 1000;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    left: 0;
+    top: 100%;
+  }
 `;
 
 const DropdownItem = styled(Link)`
@@ -124,8 +175,38 @@ const DropdownContainerHover = styled(DropdownContainer)`
   }
 `;
 
+const ImageLogo = styled.div`
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  transition: color 0.3s ease;
+  text-transform: uppercase;
+
+  img {
+    height: 80px;
+    width: 80px;
+    margin-right: 15px;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px #00000050;
+  }
+
+  &:hover {
+    color: #4caf50;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 20px;
+    img {
+      height: 60px;
+      width: 60px;
+    }
+  }
+`;
+
 const Header: React.FC = () => {
-  const [searchInput, setSearchInput] = useState<string>("");
+  const [searchInput, setSearchInput] = useState<string>('');
   const user = useSelector((state: RootState) => state.auth.isAuthenticated);
   const isAdmin = useSelector((state: RootState) => state.auth.isAdmin);
   const totalCartItems = useSelector(
@@ -146,7 +227,15 @@ const Header: React.FC = () => {
   return (
     <HeaderWrapper>
       <Logo>
-        <StyledLink to="/">E-commerce Store</StyledLink>
+        <StyledLink to="/">
+          <ImageLogo>
+            <img
+              src="https://www.onlinelogomaker.com/blog/wp-content/uploads/2017/06/shopping-online.jpg"
+              alt="logo"
+            />
+          </ImageLogo>
+          E-commerce Store
+        </StyledLink>
       </Logo>
       <Nav>
         {user && (
@@ -177,9 +266,6 @@ const Header: React.FC = () => {
                 <DropdownItem to="/profile">My Profile</DropdownItem>
                 <DropdownItem to="/wishList">Wishlist</DropdownItem>
                 <DropdownItem to="/orderHistory">Order</DropdownItem>
-                {/* <DropdownItem onClick={handleLogout} style={{ cursor: 'pointer' }}>
-                  Logout
-                </DropdownItem> */}
                 {isAdmin && (
                   <DropdownItem to="/adminHistory">History</DropdownItem>
                 )}

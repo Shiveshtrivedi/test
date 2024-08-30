@@ -1,7 +1,9 @@
-import React from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../redux/Store";
-import styled from "styled-components";
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../redux/Store';
+import { initializeOrders } from '../redux/slices/OrderSlice';
+import styled from 'styled-components';
+import { getOrdersFromCookies } from '../utils/CookieUtils';
 
 const HistoryContainer = styled.div`
   max-width: 800px;
@@ -29,38 +31,52 @@ const OrderDate = styled.p`
 `;
 
 const OrderHistoryPage: React.FC = () => {
+  const dispatch = useDispatch();
   const orders = useSelector((state: RootState) => state.order.orders);
   const userId = useSelector((state: RootState) => state.cart.userId);
 
-  const userOrders = orders.filter(order => order.userId === userId);
-  console.log("User Orders:", userOrders);
+  useEffect(() => {
+    if (userId) {
+      dispatch(initializeOrders(userId));
+    }
+  }, [userId, dispatch]);
+
+  const userOrders = orders.filter((order) => order.userId === userId);
+  console.log('User Orders:', userOrders);
+  const checkcookierorder = userId ? getOrdersFromCookies(userId) : null;
+  console.log('checkcookierorder', checkcookierorder);
 
   return (
     <HistoryContainer>
       <h1>Order History</h1>
-      {userOrders.length === 0 ? (
-        <p>No orders found.</p>
-      ) : (
-        userOrders.map(order => (
-          <OrderCard key={order.id}>
-            <OrderDate>Order Date: {new Date(order.createdAt).toLocaleDateString()}</OrderDate>
-            <OrderDetails>
-              <strong>Total Amount:</strong> ${order.totalAmount.toFixed(2)}
-            </OrderDetails>
-            <OrderDetails>
-              <strong>Address:</strong> {order.address.name}, {order.address.city}, {order.address.state}, {order.address.pincode}
-            </OrderDetails>
-            <OrderDetails>
-              <strong>Items:</strong>
+      {userOrders.map((order) => (
+        <OrderCard key={order.id}>
+          <OrderDate>
+            Order Date: {new Date(order.createdAt).toLocaleDateString()}
+          </OrderDate>
+          <OrderDetails>
+            <strong>Total Amount:</strong> ${order.totalAmount.toFixed(2)}
+          </OrderDetails>
+          <OrderDetails>
+            <strong>Address:</strong> {order.address.name}, {order.address.city}
+            , {order.address.state}, {order.address.pincode}
+          </OrderDetails>
+          <OrderDetails>
+            <strong>Items:</strong>
+            {order.items.length === 0 ? (
+              <p>No items found.</p>
+            ) : (
               <ul>
-                {order.items.map(item => (
-                  <li key={item.id}>{item.name} - ${item.price} x {item.quantity}</li>
+                {order.items.map((item) => (
+                  <li key={item.id}>
+                    {item.name} - ${item.price} x {item.quantity}
+                  </li>
                 ))}
               </ul>
-            </OrderDetails>
-          </OrderCard>
-        ))
-      )}
+            )}
+          </OrderDetails>
+        </OrderCard>
+      ))}
     </HistoryContainer>
   );
 };

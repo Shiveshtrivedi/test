@@ -1,33 +1,35 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import axios from "axios";
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import axios from 'axios';
 import {
   saveAdminHistoryToCookies,
   getAdminHistoryFromCookies,
-} from "../../utils/CookieUtils";
-import { IProduct, IProductState } from "../../utils/interface/interface";
+} from '../../utils/CookieUtils';
+import { IProduct, IProductState } from '../../utils/interface/Interface';
 
 const initialState: IProductState = {
   products: [],
   adminProductsHistory: [],
   filterProducts: [],
-  status: "idle",
+  status: 'idle',
   error: null,
   id: null,
 };
 
 export const fetchProducts = createAsyncThunk<IProduct[]>(
-  "products/fetchProducts",
+  'products/fetchProducts',
   async () => {
-    const response = await axios.get("https://fakestoreapi.com/products");
+    const response = await axios.get(
+      `${process.env.REACT_APP_PRODUCT_API_URL}`
+    );
     return response.data;
   }
 );
 
 export const addProduct = createAsyncThunk<IProduct, IProduct>(
-  "products/addProduct",
+  'products/addProduct',
   async (newProduct) => {
     const response = await axios.post(
-      "https://fakestoreapi.com/products",
+      `${process.env.REACT_APP_PRODUCT_API_URL}`,
       newProduct
     );
     return response.data;
@@ -38,38 +40,36 @@ export const deleteProduct = createAsyncThunk<
   void,
   string,
   { rejectValue: string }
->("products/deleteProduct", async (productId, { rejectWithValue }) => {
+>('products/deleteProduct', async (productId, { rejectWithValue }) => {
   try {
-    await axios.delete(`https://fakestoreapi.com/products/${productId}`);
+    await axios.delete(`${process.env.REACT_APP_PRODUCT_API_URL}/${productId}`);
   } catch (error: any) {
-    return rejectWithValue(error.response?.data || "Failed to delete product");
+    return rejectWithValue(error.response?.data || 'Failed to delete product');
   }
 });
-
 
 export const fetchProductsByCategory = createAsyncThunk<
   IProduct[],
   string,
   { rejectValue: string }
->("products/fetchProductsByCategory", async (category, { rejectWithValue }) => {
+>('products/fetchProductsByCategory', async (category, { rejectWithValue }) => {
   try {
     const response = await axios.get(
-      `https://fakestoreapi.com/products/category/${category}`
+      `${process.env.REACT_APP_PRODUCT_API_URL}/${category}`
     );
     return response.data;
   } catch (error: any) {
-    return rejectWithValue(error.response?.data || "Failed to fetch products");
+    return rejectWithValue(error.response?.data || 'Failed to fetch products');
   }
 });
 
 const productSlice = createSlice({
-  name: "products",
+  name: 'products',
   initialState,
   reducers: {
     setUserId(state, action: PayloadAction<string>) {
       state.id = action.payload;
       state.adminProductsHistory = getAdminHistoryFromCookies(action.payload);
-      console.log("Admin Products History:", state.adminProductsHistory);
     },
 
     addProductToHistory(state, action: PayloadAction<IProduct>) {
@@ -78,7 +78,6 @@ const productSlice = createSlice({
 
       if (state.id !== null) {
         saveAdminHistoryToCookies(state.id, updatedHistory);
-        console.log("Updated Admin History Saved to Cookies:", updatedHistory);
       }
     },
 
@@ -94,7 +93,6 @@ const productSlice = createSlice({
       if (state.id) {
         state.adminProductsHistory = [];
         saveAdminHistoryToCookies(state.id, []);
-        console.log("Admin History Cleared from Cookies");
       }
     },
 
@@ -105,19 +103,19 @@ const productSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchProducts.pending, (state) => {
-        state.status = "loading";
+        state.status = 'loading';
       })
       .addCase(
         fetchProducts.fulfilled,
         (state, action: PayloadAction<IProduct[]>) => {
-          state.status = "succeeded";
+          state.status = 'succeeded';
           state.products = action.payload;
-          state.filterProducts = action.payload; 
+          state.filterProducts = action.payload;
         }
       )
       .addCase(fetchProducts.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.error.message ?? "Failed to fetch products";
+        state.status = 'failed';
+        state.error = action.error.message ?? 'Failed to fetch products';
       })
       .addCase(
         addProduct.fulfilled,
@@ -126,28 +124,33 @@ const productSlice = createSlice({
         }
       )
       .addCase(addProduct.rejected, (state, action) => {
-        state.error = action.error.message ?? "Failed to add product";
+        state.error = action.error.message ?? 'Failed to add product';
       })
       .addCase(
         deleteProduct.rejected,
         (state, action: PayloadAction<string | undefined>) => {
-          state.error = action.payload ?? "Failed to delete product";
+          state.error = action.payload ?? 'Failed to delete product';
         }
       )
+      .addCase(deleteProduct.fulfilled, (state, action) => {
+        state.products = state.products.filter(
+          (product) => product.id !== action.meta.arg
+        );
+      })
       .addCase(
         fetchProductsByCategory.fulfilled,
         (state, action: PayloadAction<IProduct[]>) => {
-          state.status = "succeeded";
+          state.status = 'succeeded';
           state.products = action.payload;
-          state.filterProducts = action.payload; 
+          state.filterProducts = action.payload;
         }
       )
       .addCase(
         fetchProductsByCategory.rejected,
         (state, action: PayloadAction<string | undefined>) => {
-          state.status = "failed";
+          state.status = 'failed';
           state.error =
-            action.payload ?? "Failed to fetch products by category";
+            action.payload ?? 'Failed to fetch products by category';
         }
       );
   },

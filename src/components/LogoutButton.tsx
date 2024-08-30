@@ -1,9 +1,9 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { logout } from "../redux/slices/AuthSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../redux/Store";
-import Loading from "./Loading";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../redux/slices/AuthSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/Store';
+import Loading from './loading';
 
 const LogoutButton: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -12,10 +12,10 @@ const LogoutButton: React.FC = () => {
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate("/login");
+    navigate('/login');
   };
 
-  if (status === "loading") {
+  if (status === 'loading') {
     return (
       <div>
         <p>

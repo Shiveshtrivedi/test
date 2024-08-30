@@ -1,6 +1,6 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { RootState } from "../Store";
-import { IProduct } from "../../utils/interface/interface";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { RootState } from '../Store';
+import { IProduct } from '../../utils/interface/Interface';
 
 interface SearchState {
   searchTerm: string;
@@ -8,12 +8,12 @@ interface SearchState {
 }
 
 const initialState: SearchState = {
-  searchTerm: "",
+  searchTerm: '',
   searchResults: [],
 };
 
 const searchSlice = createSlice({
-  name: "search",
+  name: 'search',
   initialState,
   reducers: {
     setSearchTerm(state, action: PayloadAction<string>) {
@@ -23,7 +23,7 @@ const searchSlice = createSlice({
       state.searchResults = action.payload;
     },
     clearSearchResults(state) {
-      state.searchTerm = "";
+      state.searchTerm = '';
       state.searchResults = [];
     },
   },

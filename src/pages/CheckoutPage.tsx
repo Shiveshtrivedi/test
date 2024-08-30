@@ -1,14 +1,12 @@
-
-
-import React, { useState } from "react";
-import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { clearCart } from "../redux/slices/CartSlice";
-import { AppDispatch, RootState } from "../redux/Store";
-import { saveAddressToCookies, saveCartToCookies, saveOrdersToCookies, getOrdersFromCookies } from "../utils/CookieUtils";
-import { addOrder } from "../redux/slices/OrderSlice";
-import { IOrder } from "../utils/interface/interface";
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearCart } from '../redux/slices/CartSlice';
+import { AppDispatch, RootState } from '../redux/Store';
+import { saveAddressToCookies } from '../utils/CookieUtils';
+import { addOrder } from '../redux/slices/OrderSlice';
+import { IOrder } from '../utils/interface/Interface';
 
 const CheckoutContainer = styled.div`
   display: flex;
@@ -67,22 +65,23 @@ const SubmitButton = styled.button`
 `;
 
 const CheckoutPage: React.FC = () => {
-  const [name, setName] = useState("");
-  const [pincode, setPincode] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
+  const [name, setName] = useState('');
+  const [pincode, setPincode] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const userId = useSelector((state: RootState) => state.cart.userId);
   const totalAmount = useSelector((state: RootState) => state.cart.totalAmount);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    console.log('cart item in chekcout ', cartItems);
     e.preventDefault();
 
     if (!userId) {
-      alert("User is not logged in.");
+      alert('User is not logged in.');
       return;
     }
 
@@ -94,34 +93,26 @@ const CheckoutPage: React.FC = () => {
       state,
     };
 
-    // Store the address details in cookies
     saveAddressToCookies(userId, addressDetails);
 
     const newOrder: IOrder = {
       id: Date.now().toString(),
       userId,
-      items: cartItems.map(item => ({
+      items: cartItems.map((item) => ({
         ...item,
-        id: item.id.toString(),
+        id: Number(item.id),
       })),
       totalAmount,
       address: addressDetails,
       createdAt: new Date().toISOString(),
     };
-    console.log("New Order Created:", newOrder);
 
-    // Fetch existing orders from cookies
-    const existingOrders = getOrdersFromCookies(userId);
+    console.log('New Order Created:', newOrder);
+    dispatch(addOrder(newOrder));
 
-    // Add the new order to the existing orders
-    const updatedOrders = [...existingOrders, newOrder];
-    saveOrdersToCookies(userId, updatedOrders);
-
-    // Clear the cart
     dispatch(clearCart());
 
-    // Navigate to the success page
-    navigate("/checkout/success");
+    navigate('/checkout/success');
   };
 
   return (

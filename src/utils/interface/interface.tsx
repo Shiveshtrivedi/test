@@ -2,6 +2,7 @@ export interface IUser {
   id: string;
   name: string;
   email: string;
+  password: string;
 }
 
 export interface IAuthState {
@@ -50,7 +51,7 @@ export interface IProductState {
   products: IProduct[];
   adminProductsHistory: IProduct[];
   filterProducts: IProduct[];
-  status: "idle" | "loading" | "succeeded" | "failed";
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
   id: string | null;
 }
@@ -97,7 +98,7 @@ export interface IStarRatingProps {
 export interface IOrder {
   id: string;
   userId: string;
-  items: Array<{ id: string; name: string; price: number; quantity: number }>;
+  items: Array<{ id: number; name: string; price: number; quantity: number }>; // Use number here
   totalAmount: number;
   address: {
     name: string;
@@ -111,4 +112,5 @@ export interface IOrder {
 
 export interface IOrderState {
   orders: IOrder[];
+  userId: string | null;
 }

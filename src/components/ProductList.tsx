@@ -1,22 +1,24 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState, AppDispatch } from "../redux/Store";
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '../redux/Store';
 import {
   deleteProduct,
   fetchProducts,
   removeProductFromHistory,
   resetFilter,
-} from "../redux/slices/ProductSlice";
-import { Link } from "react-router-dom";
-import styled from "styled-components";
-import Loading from "./Loading";
-import { addToCart } from "../redux/slices/CartSlice";
-import { addToWishList } from "../redux/slices/WishlistSlice";
-import { toast } from "react-toastify";
-import { fetchReviews } from "../redux/slices/UserReviewSlice";
-import StarRating from "./StarRating";
-import { IProduct, IWishListItem } from "../utils/interface/interface";
-import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+} from '../redux/slices/ProductSlice';
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+import Loading from './loading';
+import { addToCart } from '../redux/slices/CartSlice';
+import { addToWishList, removeToWishList } from '../redux/slices/WishlistSlice';
+import { toast } from 'react-toastify';
+import { fetchReviews } from '../redux/slices/UserReviewSlice';
+import StarRating from './starRating';
+import { IProduct, IWishListItem } from '../utils/interface/Interface';
+import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
+import NoProductFound from './noProductFound';
+import { useLocation } from 'react-router-dom';
 
 const Container = styled.div`
   display: flex;
@@ -41,7 +43,7 @@ const ProductBox = styled.div<{ viewMode: string }>`
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  flex-direction: ${(props) => (props.viewMode === "grid" ? "row" : "column")};
+  flex-direction: ${(props) => (props.viewMode === 'grid' ? 'row' : 'column')};
 `;
 
 const FilterDropdown = styled.select`
@@ -194,7 +196,8 @@ const ProductListItem = styled.div`
     flex: 1;
   }
 `;
-const WishlistButton = styled.div<{ viewMode: string }>`
+const WishlistButton = styled.div<{ viewMode: string; isInWishlist: boolean }>`
+  background-color: ${(props) => (props.isInWishlist ? '#e64a19' : '#ff5722')};
   background-color: #ff5722;
   color: #ffffff;
   padding: 8px 1px 8px 1px;
@@ -206,9 +209,11 @@ const WishlistButton = styled.div<{ viewMode: string }>`
   margin: 0 auto;
   font-size: 16px;
   font-weight: bold;
-  width: ${(props) => (props.viewMode === "list" ? "90px" : "50px")};
+  width: ${(props) => (props.viewMode === 'list' ? '90px' : '50px')};
   box-shadow: 0 4px 6px #00000020;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease;
 
   &:hover {
     background-color: #e64a19;
@@ -240,30 +245,51 @@ const ProductList: React.FC = () => {
   const isAdmin = useSelector((state: RootState) => state.auth.isAdmin);
   const reviews = useSelector((state: RootState) => state.reviews.reviews);
   const searchTerm = useSelector((state: RootState) => state.search.searchTerm);
-  const [priceFilter, setPriceFilter] = useState("all");
-  const [ratingFilter, setRatingFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [viewMode, setViewMode] = useState("grid");
-
+  const [priceFilter, setPriceFilter] = useState<PriceFilter>('all');
+  const [ratingFilter, setRatingFilter] = useState<RatingFilter>('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [viewMode, setViewMode] = useState('grid');
+  const [wishlistStatus, setWishlistStatus] = useState<Record<string, boolean>>(
+    {}
+  );
+  const wishlist = useSelector((state: RootState) => state.wishList.items);
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const category = query.get('category') || 'all';
   useEffect(() => {
-    if (status === "idle") {
+    if (category) {
+      setCategoryFilter(category); // Update category filter based on URL query
+    }
+  }, [category]);
+  useEffect(() => {
+    if (status === 'idle') {
       dispatch(fetchProducts());
     }
     products.forEach((product: IProduct) => {
       dispatch(fetchReviews(product.id));
     });
   }, [dispatch, status, products]);
+  useEffect(() => {
+    const status = wishlist.reduce(
+      (acc, item) => {
+        acc[item.id] = true;
+        return acc;
+      },
+      {} as Record<string, boolean>
+    );
+    setWishlistStatus(status);
+  }, [wishlist]);
 
   const handlePriceFilterChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setPriceFilter(event.target.value);
+    setPriceFilter(event.target.value as PriceFilter);
   };
 
   const handleRatingFilterChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setRatingFilter(event.target.value);
+    setRatingFilter(event.target.value as RatingFilter);
   };
 
   const handleCategoryFilterChange = (
@@ -283,39 +309,70 @@ const ProductList: React.FC = () => {
     return productReviews.length ? totalRating / productReviews.length : 0;
   };
 
+  type PriceFilter = 'all' | 'low' | 'medium' | 'high';
+  type RatingFilter =
+    | 'all'
+    | '1-star'
+    | '2-star'
+    | '3-star'
+    | '4-star'
+    | '5-star';
+
+  const isPriceMatch = (price: number, filter: PriceFilter): boolean => {
+    switch (filter) {
+      case 'low':
+        return price < 50;
+      case 'medium':
+        return price >= 50 && price < 100;
+      case 'high':
+        return price >= 100;
+      case 'all':
+      default:
+        return true;
+    }
+  };
+
+  const isRatingMatch = (rating: number, filter: RatingFilter): boolean => {
+    switch (filter) {
+      case '1-star':
+        return rating >= 1 && rating < 2;
+      case '2-star':
+        return rating >= 2 && rating < 3;
+      case '3-star':
+        return rating >= 3 && rating < 4;
+      case '4-star':
+        return rating >= 4 && rating < 5;
+      case '5-star':
+        return rating === 5;
+      case 'all':
+      default:
+        return true;
+    }
+  };
+
+  const isCategoryMatch = (category: string, filter: string): boolean => {
+    return filter === 'all' || category === filter || category === filter;
+  };
+
+  const isSearchMatch = (title: string, searchTerm: string): boolean => {
+    return title.toLowerCase().includes(searchTerm.toLowerCase());
+  };
   const filteredProducts: IProduct[] = products.filter((product: IProduct) => {
     const averageRating = getAverageRating(product.id);
 
-    const priceMatch =
-      priceFilter === "all" ||
-      (priceFilter === "low" && product.price < 50) ||
-      (priceFilter === "medium" &&
-        product.price >= 50 &&
-        product.price < 100) ||
-      (priceFilter === "high" && product.price >= 100);
-
-    const ratingMatch =
-      ratingFilter === "all" ||
-      (ratingFilter === "1-star" && averageRating >= 1 && averageRating < 2) ||
-      (ratingFilter === "2-star" && averageRating >= 2 && averageRating < 3) ||
-      (ratingFilter === "3-star" && averageRating >= 3 && averageRating < 4) ||
-      (ratingFilter === "4-star" && averageRating >= 4 && averageRating < 5) ||
-      (ratingFilter === "5-star" && averageRating === 5);
-
-    const categoryMatch =
-      categoryFilter === "all" || product.category === categoryFilter;
-    const searchMatch = product.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-
-    return priceMatch && ratingMatch && categoryMatch && searchMatch;
+    return (
+      isPriceMatch(product.price, priceFilter) &&
+      isRatingMatch(averageRating, ratingFilter) &&
+      isCategoryMatch(product.category, categoryFilter) &&
+      isSearchMatch(product.title, searchTerm)
+    );
   });
 
-  if (status === "loading") {
+  if (status === 'loading') {
     return <Loading />;
   }
 
-  if (status === "failed") {
+  if (status === 'failed') {
     return <div>{error}</div>;
   }
 
@@ -329,7 +386,7 @@ const ProductList: React.FC = () => {
         quantity: 1,
       })
     );
-    toast.success("Item added to cart");
+    toast.success('Item added to cart');
   };
 
   const handleAddToWishlist = (product: IProduct) => {
@@ -339,21 +396,27 @@ const ProductList: React.FC = () => {
       price: product.price,
       image: product.image,
     };
-    dispatch(addToWishList(wishListItem));
-    toast.success(`added to wishlist`);
+
+    if (wishlist.some((item) => item.id === wishListItem.id)) {
+      dispatch(removeToWishList(wishListItem.id));
+      toast.error(`Removed from wishlist`);
+    } else {
+      dispatch(addToWishList(wishListItem));
+      toast.success(`Added to wishlist`);
+    }
   };
 
   const handleToDelete = (id: string) => {
     dispatch(deleteProduct(id));
     dispatch(removeProductFromHistory(id));
-    toast.error("Item deleted");
+    toast.error('Item deleted');
   };
 
   const handleResetFilter = () => {
     dispatch(resetFilter());
-    setPriceFilter("all");
-    setRatingFilter("all");
-    setCategoryFilter("all");
+    setPriceFilter('all');
+    setRatingFilter('all');
+    setCategoryFilter('all');
   };
 
   return (
@@ -391,31 +454,68 @@ const ProductList: React.FC = () => {
 
         <FilterButton onClick={handleResetFilter}>Reset Filters</FilterButton>
         <ToggleButton
-          onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+          onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
         >
-          {viewMode === "grid" ? "List" : "Grid"} View
+          {viewMode === 'grid' ? 'List' : 'Grid'} View
         </ToggleButton>
       </FilterBox>
-
-      <ProductBox viewMode={viewMode}>
-        {filteredProducts.map((product: IProduct) =>
-          viewMode === "grid" ? (
-            <ProductGridItem key={product.id}>
-              <Link to={`/products/${product.id}`} title={product.title}>
-                <Image src={product.image} alt={product.title} />
-              </Link>
-              <Link to={`/products/${product.id}`} title={product.title}>
+      {filteredProducts.length === 0 ? (
+        <NoProductFound />
+      ) : (
+        <ProductBox viewMode={viewMode}>
+          {filteredProducts.map((product: IProduct) =>
+            viewMode === 'grid' ? (
+              <ProductGridItem key={product.id}>
+                <Link to={`/products/${product.id}`} title={product.title}>
+                  <Image src={product.image} alt={product.title} />
+                </Link>
+                <Link to={`/products/${product.id}`} title={product.title}>
+                  <ProductNameContainer data-title={product.title}>
+                    {product.title}
+                  </ProductNameContainer>
+                </Link>
+                <Price>{product.price}$</Price>
+                <StarRating
+                  rating={getAverageRating(product.id)}
+                  onRatingChange={undefined}
+                  interactive={false}
+                />
+                <div style={{ display: 'flex' }}>
+                  <Button onClick={() => handleAddToCart(product)}>
+                    Add to Cart
+                  </Button>
+                  {isAdmin && (
+                    <Button onClick={() => handleToDelete(product.id)}>
+                      Delete
+                    </Button>
+                  )}
+                  <WishlistButton
+                    isInWishlist={wishlistStatus[product.id] || false}
+                    viewMode={viewMode}
+                    onClick={() => handleAddToWishlist(product)}
+                  >
+                    {wishlistStatus[product.id] ? (
+                      <AiFillHeart />
+                    ) : (
+                      <AiOutlineHeart />
+                    )}
+                  </WishlistButton>
+                </div>
+              </ProductGridItem>
+            ) : (
+              <ProductListItem key={product.id}>
+                <Link to={`/products/${product.id}`} title={product.title}>
+                  <Image src={product.image} alt={product.title} />
+                </Link>
                 <ProductNameContainer data-title={product.title}>
                   {product.title}
                 </ProductNameContainer>
-              </Link>
-              <Price>{product.price}$</Price>
-              <StarRating
-                rating={getAverageRating(product.id)}
-                onRatingChange={undefined}
-                interactive={false}
-              />
-              <div style={{ display: "flex" }}>
+                <Price>{product.price}$</Price>
+                <StarRating
+                  rating={getAverageRating(product.id)}
+                  onRatingChange={undefined}
+                  interactive={false}
+                />
                 <Button onClick={() => handleAddToCart(product)}>
                   Add to Cart
                 </Button>
@@ -424,46 +524,33 @@ const ProductList: React.FC = () => {
                     Delete
                   </Button>
                 )}
-                <WishlistButton
+                {/* <WishlistButton
+                  isInWishlist={wishlistStatus[product.id] || false}
                   viewMode={viewMode}
                   onClick={() => handleAddToWishlist(product)}
                 >
-                  <Icon />
+                  {wishlistStatus[product.id] ? (
+                    <AiFillHeart />
+                  ) : (
+                    <AiOutlineHeart />
+                  )}
+                </WishlistButton> */}
+                <WishlistButton
+                  isInWishlist={wishlistStatus[product.id] || false}
+                  viewMode={viewMode}
+                  onClick={() => handleAddToWishlist(product)}
+                >
+                  {wishlistStatus[product.id] ? (
+                    <AiFillHeart />
+                  ) : (
+                    <AiOutlineHeart />
+                  )}
                 </WishlistButton>
-              </div>
-            </ProductGridItem>
-          ) : (
-            <ProductListItem key={product.id}>
-              <Link to={`/products/${product.id}`} title={product.title}>
-                <Image src={product.image} alt={product.title} />
-              </Link>
-              <ProductNameContainer data-title={product.title}>
-                {product.title}
-              </ProductNameContainer>
-              <Price>{product.price}$</Price>
-              <StarRating
-                rating={getAverageRating(product.id)}
-                onRatingChange={undefined}
-                interactive={false}
-              />
-              <Button onClick={() => handleAddToCart(product)}>
-                Add to Cart
-              </Button>
-              {isAdmin && (
-                <Button onClick={() => handleToDelete(product.id)}>
-                  Delete
-                </Button>
-              )}  
-              <WishlistButton
-                viewMode={viewMode}
-                onClick={() => handleAddToWishlist(product)}
-              >
-                <Icon /> Wishlist
-              </WishlistButton>
-            </ProductListItem>
-          )
-        )}
-      </ProductBox>
+              </ProductListItem>
+            )
+          )}
+        </ProductBox>
+      )}
     </Container>
   );
 };

@@ -1,9 +1,9 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import styled from "styled-components";
-import { IoLogoFacebook } from "react-icons/io5";
-import { FcGoogle } from "react-icons/fc";
-import { FaLinkedin } from "react-icons/fa";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+import { IoLogoFacebook } from 'react-icons/io5';
+import { FcGoogle } from 'react-icons/fc';
+import { FaLinkedin } from 'react-icons/fa';
 
 const FooterWrapper = styled.footer`
   padding: 16px 32px;
@@ -41,7 +41,7 @@ const SocialIcon = styled.a`
   transition: color 0.3s ease;
 
   &:hover {
-    color: #00aced; 
+    color: #00aced;
   }
 
   &:first-child {
@@ -66,13 +66,25 @@ const Footer: React.FC = () => {
         <StyledLink to="/help">Help</StyledLink>
       </FooterLinks>
       <SocialMedia>
-        <SocialIcon href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">
+        <SocialIcon
+          href="https://www.facebook.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <IoLogoFacebook />
         </SocialIcon>
-        <SocialIcon href="https://www.google.com" target="_blank" rel="noopener noreferrer">
+        <SocialIcon
+          href="https://www.google.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <FcGoogle />
         </SocialIcon>
-        <SocialIcon href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer">
+        <SocialIcon
+          href="https://www.linkedin.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <FaLinkedin />
         </SocialIcon>
       </SocialMedia>

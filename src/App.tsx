@@ -1,32 +1,33 @@
-import React from "react";
-import "./styles/global.css";
-import { Routes, Route } from "react-router-dom";
-import PrivateRoute from "./components/PrivateRoute";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import ProfilePage from "./pages/ProfilePage";
-import ProductList from "./components/ProductList";
-import ProductPage from "./pages/ProductPage";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import Cart from "./components/Cart";
-import WishlistPage from "./pages/WishlistPage";
-import AddProductPage from "./pages/AddProductPage";
-import AdminRoute from "./components/AdminRoute";
-import AdminHistoryPage from "./pages/AdminHistoryPage";
-import CheckoutPage from "./pages/CheckoutPage";
-import OrderHistoryPage from "./pages/OrderHistoryPage";
-import AboutPage from "./pages/AboutPage";
-import ContactPage from "./pages/ContactPage";
-import PrivacyPolicy from "./components/PrivacyPolicy";
-import TermsOfService from "./components/TermsOfService";
-import Help from "./components/HelpPage";
+import React from 'react';
+import './styles/global.css';
+import { Routes, Route } from 'react-router-dom';
+import PrivateRoute from './components/privateRoute';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import ProfilePage from './pages/ProfilePage';
+import ProductList from './components/productList';
+import ProductPage from './pages/ProductPage';
+import Header from './components/header';
+import Footer from './components/footer';
+import Cart from './components/cart';
+import WishlistPage from './pages/WishlistPage';
+import AddProductPage from './pages/AddProductPage';
+import AdminRoute from './components/adminRoute';
+import AdminHistoryPage from './pages/AdminHistoryPage';
+import CheckoutPage from './pages/CheckoutPage';
+import OrderHistoryPage from './pages/OrderHistoryPage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
+import PrivacyPolicy from './components/privacyPolicy';
+import TermsOfService from './components/termsOfService';
+import Help from './components/helpPage';
+import SuccessTickAnimation from './components/successTickAnimation';
 
 function App() {
   return (
     <div id="root">
       <Header />
-      <main style={{ overflowY: "auto" }}>
+      <main style={{ overflowY: 'auto' }}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
@@ -79,10 +80,15 @@ function App() {
             path="/contact"
             element={<PrivateRoute element={<ContactPage />} />}
           />
+          <Route
+            path="/checkout/success"
+            element={<PrivateRoute element={<SuccessTickAnimation />} />}
+          />
           <Route path="/checkout/success" element="order success" />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/help" element={<Help />} />
+          <Route path="/products/:category" element={<ProductList />} />
         </Routes>
       </main>
       <Footer />

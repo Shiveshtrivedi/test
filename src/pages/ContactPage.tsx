@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import styled from 'styled-components';
@@ -53,13 +52,16 @@ const SubmitButton = styled.button`
 `;
 
 const ContactPage: React.FC = () => {
-  const { register, handleSubmit,reset, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
 
-  const onSubmit = (data: any) => {
-    console.log(data);
-    toast.success("Message sent successfully!");
+  const onSubmit = () => {
+    toast.success('Message sent successfully!');
     reset();
-    
   };
 
   return (
@@ -103,7 +105,7 @@ const ContactPage: React.FC = () => {
             rows={5}
             {...register('message', { required: 'Message is required' })}
           />
-          {errors.message?.message && <p>{errors.message.message.toString()}</p>}
+          {errors.message && <p>{errors.message.message?.toString()}</p>}
         </FormGroup>
 
         <SubmitButton type="submit">Send Message</SubmitButton>

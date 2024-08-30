@@ -1,10 +1,9 @@
-import React from "react";
-import SignupForm from "../components/SignupForm";
+import React from 'react';
+import SignupForm from '../components/signupForm';
 
-const SignupPage:React.FC = () => {
+const SignupPage: React.FC = () => {
   return (
     <div>
-      <h1>Signup</h1>
       <SignupForm />
     </div>
   );

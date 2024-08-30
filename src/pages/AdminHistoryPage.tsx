@@ -1,8 +1,11 @@
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../redux/Store";
-import { clearHistory, removeProductFromHistory } from "../redux/slices/ProductSlice";
-import { toast } from "react-toastify";
-import styled from "styled-components";
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/Store';
+import {
+  clearHistory,
+  removeProductFromHistory,
+} from '../redux/slices/ProductSlice';
+import { toast } from 'react-toastify';
+import styled from 'styled-components';
 
 const PageContainer = styled.div`
   padding: 20px;
@@ -95,17 +98,19 @@ const ClearHistoryButton = styled.button`
 `;
 
 const AdminHistoryPage: React.FC = () => {
-  const adminProductsHistory = useSelector((state: RootState) => state.products.adminProductsHistory);
+  const adminProductsHistory = useSelector(
+    (state: RootState) => state.products.adminProductsHistory
+  );
   const dispatch = useDispatch<AppDispatch>();
 
   const handleRemoveProduct = (productId: string) => {
     dispatch(removeProductFromHistory(productId));
-    toast.error("Product removed from history");
+    toast.error('Product removed from history');
   };
 
   const handleClearHistory = () => {
     dispatch(clearHistory());
-    toast.error("History Cleared");
+    toast.error('History Cleared');
   };
 
   return (
@@ -130,7 +135,10 @@ const AdminHistoryPage: React.FC = () => {
               </ActionButton>
             </ProductItem>
           ))}
-          <ClearHistoryButton onClick={handleClearHistory} aria-label="Clear all history">
+          <ClearHistoryButton
+            onClick={handleClearHistory}
+            aria-label="Clear all history"
+          >
             Clear History
           </ClearHistoryButton>
         </ProductList>

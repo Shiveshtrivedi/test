@@ -1,4 +1,3 @@
-
 import React from 'react';
 import styled from 'styled-components';
 
@@ -43,7 +42,7 @@ const Help: React.FC = () => {
   return (
     <HelpContainer>
       <Heading>Help & Support</Heading>
-      
+
       <Section>
         <SectionHeading>Frequently Asked Questions (FAQs)</SectionHeading>
         <Paragraph>
@@ -52,15 +51,24 @@ const Help: React.FC = () => {
         <List>
           <ListItem>
             <strong>How do I create an account?</strong>
-            <p>To create an account, click on the "Sign Up" button at the top right corner of the page and follow the instructions.</p>
+            <p>
+              To create an account, click on the "Sign Up" button at the top
+              right corner of the page and follow the instructions.
+            </p>
           </ListItem>
           <ListItem>
             <strong>How do I reset my password?</strong>
-            <p>If you have forgotten your password, click on "Forgot Password" on the login page and follow the instructions to reset it.</p>
+            <p>
+              If you have forgotten your password, click on "Forgot Password" on
+              the login page and follow the instructions to reset it.
+            </p>
           </ListItem>
           <ListItem>
             <strong>How can I update my profile information?</strong>
-            <p>Log in to your account, go to your profile settings, and update your information as needed.</p>
+            <p>
+              Log in to your account, go to your profile settings, and update
+              your information as needed.
+            </p>
           </ListItem>
         </List>
       </Section>
@@ -73,7 +81,10 @@ const Help: React.FC = () => {
         <List>
           <ListItem>
             <strong>Clear your browser cache and cookies.</strong>
-            <p>This can resolve many issues related to outdated or corrupted data.</p>
+            <p>
+              This can resolve many issues related to outdated or corrupted
+              data.
+            </p>
           </ListItem>
           <ListItem>
             <strong>Ensure your browser is up to date.</strong>
@@ -81,7 +92,10 @@ const Help: React.FC = () => {
           </ListItem>
           <ListItem>
             <strong>Check your internet connection.</strong>
-            <p>Make sure you have a stable internet connection to access our services.</p>
+            <p>
+              Make sure you have a stable internet connection to access our
+              services.
+            </p>
           </ListItem>
         </List>
       </Section>

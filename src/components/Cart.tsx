@@ -1,16 +1,16 @@
-
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../redux/Store";
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/Store';
 import {
   addToCart,
   clearCart,
   removeToCart,
   checkout,
-} from "../redux/slices/CartSlice";
-import { toast } from "react-toastify";
-import styled from "styled-components";
-import { Link, useNavigate } from "react-router-dom";
+  setUserId,
+} from '../redux/slices/CartSlice';
+import { toast } from 'react-toastify';
+import styled from 'styled-components';
+import { Link, useNavigate } from 'react-router-dom';
 
 const CartContainer = styled.div`
   padding: 20px;
@@ -20,6 +20,18 @@ const CartContainer = styled.div`
   max-width: 600px;
   height: 383px;
   margin: 0 auto;
+  overflow-y: auto; /* Allows scrolling if content overflows */
+
+  @media (max-width: 768px) {
+    padding: 15px;
+    max-width: 90%;
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px;
+    max-width: 95%;
+    height: auto; /* Adjust height for mobile */
+  }
 `;
 
 const CartItem = styled.div`
@@ -28,6 +40,18 @@ const CartItem = styled.div`
   padding: 10px;
   border-bottom: 1px solid #ddd;
   margin-bottom: 10px;
+
+  @media (max-width: 768px) {
+    padding: 8px;
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 6px;
+    margin-bottom: 6px;
+  }
 `;
 
 const ItemImage = styled.img`
@@ -36,19 +60,55 @@ const ItemImage = styled.img`
   object-fit: contain;
   border-radius: 4px;
   margin-right: 15px;
+
+  @media (max-width: 768px) {
+    width: 60px;
+    height: 80px;
+    margin-right: 10px;
+  }
+
+  @media (max-width: 480px) {
+    width: 50px;
+    height: 70px;
+    margin-right: 5px;
+  }
 `;
 
 const ItemDetails = styled.div`
   flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;
 
 const ItemName = styled.span`
   font-weight: bold;
   margin-right: 10px;
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
 `;
 
 const ItemPrice = styled.span`
   color: #555;
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
 `;
 
 const QuantityButton = styled.button`
@@ -64,11 +124,29 @@ const QuantityButton = styled.button`
   &:hover {
     background-color: #0056b3;
   }
+
+  @media (max-width: 768px) {
+    padding: 4px 8px;
+    font-size: 14px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 3px 6px;
+    font-size: 12px;
+  }
 `;
 
 const QuantitySpan = styled.span`
   font-size: 20px;
   margin: 0 10px;
+
+  @media (max-width: 768px) {
+    font-size: 18px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 16px;
+  }
 `;
 
 const ClearCartButton = styled.button`
@@ -83,41 +161,96 @@ const ClearCartButton = styled.button`
   &:hover {
     background-color: #c82333;
   }
+
+  @media (max-width: 768px) {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
 `;
 
 const TotalAmount = styled.p`
   font-size: 24px;
   font-weight: bold;
   margin-top: 20px;
+
+  @media (max-width: 768px) {
+    font-size: 20px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 18px;
+  }
 `;
+
 const ItemNameLink = styled(Link)`
   text-decoration: none;
   color: #333;
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
 `;
+
+const CheckoutButton = styled.button`
+  width: 100%;
+  padding: 10px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 16px;
+
+  &:hover {
+    background-color: #218838;
+  }
+
+  &:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 6px;
+    font-size: 12px;
+  }
+`;
+
 const Cart: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const totalAmount = useSelector((state: RootState) => state.cart.totalAmount);
-  const userId = useSelector((state: RootState) => state.cart.userId) || "";
+  const userId = useSelector((state: RootState) => state.cart.userId) ?? '';
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleCheckout = async () => {
-    if (!cartItems.length) {
-      toast.warn("Your cart is empty!");
-      return;
-    }
-
     setIsLoading(true);
-    // try {
-    //   await dispatch(checkout()).unwrap();
-    //   toast.success("Checkout successful!");
-    //   navigate("/checkout");
-    // } catch (error) {
-    //   toast.error("Checkout failed. Please try again.");
-    // } finally {
-    //   setIsLoading(false);
-    // }
+    try {
+      dispatch(setUserId(userId));
+      dispatch(checkout());
+      toast.success('Checkout successful!');
+      navigate('/checkout');
+    } catch (error) {
+      toast.error('Checkout failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -140,7 +273,7 @@ const Cart: React.FC = () => {
               <QuantityButton
                 onClick={() => {
                   dispatch(removeToCart(item.id));
-                  toast.error("Item removed from cart");
+                  toast.error('Item removed from cart');
                 }}
               >
                 -
@@ -157,7 +290,7 @@ const Cart: React.FC = () => {
                       quantity: 1,
                     })
                   );
-                  toast.success("Item added to cart");
+                  toast.success('Item added to cart');
                 }}
               >
                 +
@@ -168,14 +301,14 @@ const Cart: React.FC = () => {
           <ClearCartButton
             onClick={() => {
               dispatch(clearCart());
-              toast.error("Cart cleared");
+              toast.error('Cart cleared');
             }}
           >
             Clear Cart
           </ClearCartButton>
-          <button onClick={handleCheckout} disabled={isLoading}>
-            {isLoading ? "Processing..." : "Checkout"}
-          </button>
+          <CheckoutButton onClick={handleCheckout} disabled={isLoading}>
+            {isLoading ? 'Processing...' : 'Checkout'}
+          </CheckoutButton>
         </>
       )}
     </CartContainer>
@@ -183,4 +316,3 @@ const Cart: React.FC = () => {
 };
 
 export default Cart;
-

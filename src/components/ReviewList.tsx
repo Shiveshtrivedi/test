@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchReviews,
   selectReviewsForProduct,
-} from "../redux/slices/UserReviewSlice";
-import { AppDispatch, RootState } from "../redux/Store";
-import styled from "styled-components";
+} from '../redux/slices/UserReviewSlice';
+import { AppDispatch, RootState } from '../redux/Store';
+import styled from 'styled-components';
 
 const Container = styled.div`
   width: 100%;
@@ -69,7 +69,6 @@ const ReviewList = ({ productId }: { productId: string }) => {
   const error = useSelector((state: RootState) => state.reviews.error);
 
   useEffect(() => {
-    console.log("Fetching reviews for product:", productId);
     dispatch(fetchReviews(productId));
   }, [dispatch, productId]);
 

@@ -1,20 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import styled from "styled-components";
-import Loading from "../components/Loading";
-import { toast } from "react-toastify";
-import { useDispatch, useSelector } from "react-redux";
-import { addToCart } from "../redux/slices/CartSlice";
-import ReviewList from "../components/ReviewList";
-import ReviewForm from "../components/ReviewForm";
-import StarRating from "../components/StarRating";
-import { postReview } from "../redux/slices/UserReviewSlice";
-import { AppDispatch, RootState } from "../redux/Store";
-import { fetchProducts } from "../redux/slices/ProductSlice";
-import {
-  fetchReviews,
-  selectReviewsForProduct,
-} from "../redux/slices/UserReviewSlice";
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
+import Loading from '../components/loading';
+import { toast } from 'react-toastify';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart } from '../redux/slices/CartSlice';
+import ReviewList from '../components/reviewList';
+import ReviewForm from '../components/reviewForm';
+import StarRating from '../components/starRating';
+import { postReview, fetchReviews } from '../redux/slices/UserReviewSlice';
+import { AppDispatch, RootState } from '../redux/Store';
+import { fetchProducts } from '../redux/slices/ProductSlice';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -71,13 +67,22 @@ const ProductPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [product, setProduct] = useState<any>(null);
+  interface Product {
+    id: string;
+    title: string;
+    price: number;
+    image: string;
+    description: string;
+    rating?: {
+      rate: number;
+      count: number;
+    };
+  }
+
+  const [product, setProduct] = useState<Product | null>(null);
   const dispatch = useDispatch<AppDispatch>();
 
   const products = useSelector((state: RootState) => state.products.products);
-  const reviews = useSelector((state: RootState) =>
-    selectReviewsForProduct(state.reviews, id || "")
-  );
   useEffect(() => {
     if (products.length === 0) {
       setLoading(true);
@@ -85,7 +90,7 @@ const ProductPage: React.FC = () => {
         .unwrap()
         .then(() => setLoading(false))
         .catch(() => {
-          setError("Failed to fetch products");
+          setError('Failed to fetch products');
           setLoading(false);
         });
     } else {
@@ -96,9 +101,13 @@ const ProductPage: React.FC = () => {
   useEffect(() => {
     const foundProduct = products.find((p) => p.id.toString() === id);
     if (foundProduct) {
-      setProduct(foundProduct);
+      const productWithDescription: Product = {
+        ...foundProduct,
+        description: '',
+      };
+      setProduct(productWithDescription);
     } else if (!loading) {
-      setError("Product not found");
+      setError('Product not found');
     }
   }, [products, id, loading]);
   useEffect(() => {
@@ -111,41 +120,46 @@ const ProductPage: React.FC = () => {
   if (error) return <div>{error}</div>;
   if (!product) return <div>Product not found</div>;
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: Product) => {
     dispatch(
       addToCart({
-        id: product.id,
+        id: parseInt(product.id),
         name: product.title,
         price: product.price,
         image: product.image,
         quantity: 1,
       })
     );
-    toast.success("Product added to cart");
+    toast.success('Product added to cart');
   };
 
   const onRatingChange = (value: number) => {
-    setProduct((prevProduct: any) => ({
-      ...prevProduct,
-      rating: {
-        ...prevProduct.rating,
-        rate:
-          (prevProduct.rating.rate * prevProduct.rating.count + value) /
-          (prevProduct.rating.count + 1),
-        count: prevProduct.rating.count + 1,
-      },
-    }));
+    setProduct((prevProduct: Product | null) => {
+      if (prevProduct?.rating) {
+        return {
+          ...prevProduct,
+          rating: {
+            ...prevProduct.rating,
+            rate:
+              (prevProduct.rating.rate * prevProduct.rating.count + value) /
+              (prevProduct.rating.count + 1),
+            count: prevProduct.rating.count + 1,
+          },
+        };
+      }
+      return prevProduct;
+    });
 
     const review = {
       id: Date.now().toString(),
       productId: id,
-      userId: "user1",
+      userId: 'user1',
       rating: value,
-      comment: "",
+      comment: '',
       timestamp: new Date().toISOString(),
     };
 
-    if (product.id) {
+    if (product?.id) {
       dispatch(postReview({ ...review, productId: product.id }));
     }
   };
@@ -163,7 +177,7 @@ const ProductPage: React.FC = () => {
       <Price>{product.price}$</Price>
       <Description>{product.description}</Description>
       <Button onClick={() => handleAddToCart(product)}>Add to Cart</Button>
-      {product.id && <ReviewForm productId={product.id} userId={"user1"} />}
+      {product.id && <ReviewForm productId={product.id} userId={'user1'} />}
       {product.id && <ReviewList productId={product.id} />}
     </Container>
   );

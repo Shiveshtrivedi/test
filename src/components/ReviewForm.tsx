@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { postReview } from "../redux/slices/UserReviewSlice";
-import { AppDispatch } from "../redux/Store";
-import styled from "styled-components";
-import { toast } from "react-toastify";
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { postReview } from '../redux/slices/UserReviewSlice';
+import { AppDispatch } from '../redux/Store';
+import styled from 'styled-components';
+import { toast } from 'react-toastify';
 
 const FormContainer = styled.div`
   max-width: 600px;
@@ -87,7 +87,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   userId: string;
 }) => {
   const [rating, setRating] = useState(5);
-  const [comment, setComment] = useState("");
+  const [comment, setComment] = useState('');
   const dispatch = useDispatch<AppDispatch>();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -101,9 +101,9 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       timestamp: new Date().toISOString(),
     };
     dispatch(postReview(newReview))
-    .then(() => toast.success("Rating submitted successfully"))
-    .catch(() => toast.error("Failed to submit rating"));
-    setComment("");
+      .then(() => toast.success('Rating submitted successfully'))
+      .catch(() => toast.error('Failed to submit rating'));
+    setComment('');
   };
 
   return (

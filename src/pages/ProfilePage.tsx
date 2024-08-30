@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../redux/Store";
-import { logout } from "../redux/slices/AuthSlice";
-import axios from "axios";
-import Loading from "../components/Loading";
-import { toast } from "react-toastify";
-import styled from "styled-components";
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/Store';
+import { logout } from '../redux/slices/AuthSlice';
+import axios from 'axios';
+import Loading from '../components/loading';
+import { toast } from 'react-toastify';
+import styled from 'styled-components';
 import {
   getAddressFromCookies,
   saveAddressToCookies,
-} from "../utils/CookieUtils";
+} from '../utils/CookieUtils';
 
 const Container = styled.div`
   max-width: 800px;
@@ -79,8 +79,8 @@ const ProfilePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
   const [userData, setUserData] = useState<{ name: string; email: string }>({
-    name: "",
-    email: "",
+    name: '',
+    email: '',
   });
   const [address, setAddress] = useState<{
     name: string;
@@ -89,30 +89,29 @@ const ProfilePage: React.FC = () => {
     city: string;
     state: string;
   }>({
-    name: "",
-    pincode: "",
-    phoneNumber: "",
-    city: "",
-    state: "",
+    name: '',
+    pincode: '',
+    phoneNumber: '',
+    city: '',
+    state: '',
   });
   const [loading, setLoading] = useState(true);
 
+  const api_url = process.env.REACT_APP_USER_API_URL;
   useEffect(() => {
     const fetchUserData = async () => {
       if (user) {
         try {
-          const response = await axios.get(
-            `https://66cac6ec59f4350f064fdbf4.mockapi.io/Users/${user.id}`
-          );
+          const response = await axios.get(`${api_url}/${user.id}`);
           setUserData(response.data);
-          // Load user address from cookies
+
           const userAddress = getAddressFromCookies(user.id);
           if (userAddress) {
             setAddress(userAddress);
           }
         } catch (error) {
-          console.error("Failed to fetch user data", error);
-          toast.error("Failed to fetch user data");
+          console.error('Failed to fetch user data', error);
+          toast.error('Failed to fetch user data');
         }
         setLoading(false);
       }
@@ -127,23 +126,20 @@ const ProfilePage: React.FC = () => {
   const handleUpdate = async () => {
     try {
       if (user) {
-        const response = await axios.put(
-          `https://66cac6ec59f4350f064fdbf4.mockapi.io/Users/${user.id}`,
-          userData
-        );
+        const response = await axios.put(`${api_url}/${user.id}`, userData);
         setUserData(response.data);
-        toast.success("Profile update successful");
+        toast.success('Profile update successful');
       }
     } catch (error) {
-      console.error("Failed to update user data", error);
-      toast.error("Failed to update user data");
+      console.error('Failed to update user data', error);
+      toast.error('Failed to update user data');
     }
   };
 
   const handleAddressUpdate = () => {
     if (user) {
       saveAddressToCookies(user.id, address);
-      toast.success("Address updated successfully");
+      toast.success('Address updated successfully');
     }
   };
 

@@ -1,12 +1,13 @@
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { login } from "../redux/slices/AuthSlice";
-import { setUserId as setCartUserId } from "../redux/slices/CartSlice";
-import { setUserId as setWishlistUserId } from "../redux/slices/WishlistSlice";
-import { setUserId as adminHistoryUserId } from "../redux/slices/ProductSlice";
-import { useNavigate } from "react-router-dom";
-import { RootState, AppDispatch } from "../redux/Store";
-import styled from "styled-components";
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from '../redux/slices/AuthSlice';
+import { setUserId as setCartUserId } from '../redux/slices/CartSlice';
+import { setUserId as setWishlistUserId } from '../redux/slices/WishlistSlice';
+import { setUserId as adminHistoryUserId } from '../redux/slices/ProductSlice';
+import { useNavigate } from 'react-router-dom';
+import { RootState, AppDispatch } from '../redux/Store';
+import styled from 'styled-components';
+import { initializeOrders } from '../redux/slices/OrderSlice';
 
 const LoginWrapper = styled.div`
   display: flex;
@@ -16,6 +17,14 @@ const LoginWrapper = styled.div`
   height: 100vh;
   background-color: #f4f4f9;
   padding: 20px;
+
+  @media (max-width: 768px) {
+    padding: 15px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px;
+  }
 `;
 
 const LoginFormContainer = styled.div`
@@ -25,12 +34,30 @@ const LoginFormContainer = styled.div`
   padding: 20px;
   width: 100%;
   max-width: 400px;
+
+  @media (max-width: 768px) {
+    padding: 15px;
+    max-width: 90%;
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px;
+    max-width: 95%;
+  }
 `;
 
 const Title = styled.h1`
   text-align: center;
   color: #333;
   margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 20px;
+  }
 `;
 
 const Input = styled.input`
@@ -44,6 +71,16 @@ const Input = styled.input`
   &:focus {
     border-color: #007bff;
     outline: none;
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 6px;
+    margin-bottom: 10px;
   }
 `;
 
@@ -61,17 +98,35 @@ const Button = styled.button`
   &:hover {
     background-color: #0056b3;
   }
+
+  @media (max-width: 768px) {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 6px;
+    font-size: 12px;
+  }
 `;
 
 const ErrorText = styled.p`
   color: #ff0000;
   text-align: center;
   margin-top: 10px;
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 12px;
+  }
 `;
 
 const LoginForm: React.FC = () => {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const error = useSelector((state: RootState) => state.auth.error);
@@ -82,12 +137,13 @@ const LoginForm: React.FC = () => {
       const user = await dispatch(login({ email, password })).unwrap();
       dispatch(setCartUserId(user.token));
       dispatch(setWishlistUserId(user.token));
-      if (user.user.email.endsWith("@intimetec.com")) {
+      dispatch(initializeOrders(user.token));
+      if (user.user.email.endsWith('@intimetec.com')) {
         dispatch(adminHistoryUserId(user.token));
       }
-      navigate("/");
+      navigate('/');
     } catch (err) {
-      console.error("Failed to login:", err);
+      console.error('Failed to login:', err);
     }
   };
 

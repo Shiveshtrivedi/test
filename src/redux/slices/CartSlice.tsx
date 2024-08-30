@@ -1,6 +1,11 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { saveCartToCookies, getCartFromCookies } from "../../utils/CookieUtils";
-import { ICartItem, ICartState } from "../../utils/interface/interface";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {
+  saveCartToCookies,
+  getCartFromCookies,
+  saveOrdersToCookies,
+  getOrdersFromCookies,
+} from '../../utils/CookieUtils';
+import { ICartItem, ICartState, IOrder } from '../../utils/interface/Interface';
 
 const initialState: ICartState = {
   items: [],
@@ -10,7 +15,7 @@ const initialState: ICartState = {
 };
 
 const cartSlice = createSlice({
-  name: "cart",
+  name: 'cart',
   initialState,
   reducers: {
     setUserId(state, action: PayloadAction<string>) {
@@ -91,11 +96,41 @@ const cartSlice = createSlice({
     },
     checkout(state) {
       if (!state.userId) return;
-      state.items = [];
-      state.totalAmount = 0;
-      state.totalItems = 0;
-      saveCartToCookies(state.userId, state.items);
 
+      const transformedItems = state.items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+      }));
+
+      const orders = getOrdersFromCookies(state.userId) || [];
+      const newOrder: IOrder = {
+        id: Date.now().toString(),
+        userId: state.userId,
+        items: transformedItems,
+        totalAmount: state.totalAmount,
+        address: {
+          name: '',
+          pincode: '',
+          phoneNumber: '',
+          city: '',
+          state: '',
+        },
+        createdAt: new Date().toISOString(),
+      };
+
+      orders.push(newOrder);
+      saveOrdersToCookies(state.userId, orders);
+
+      saveCartToCookies(state.userId, state.items);
+    },
+    saveOrder(state, action: PayloadAction<IOrder>) {
+      if (!state.userId) return;
+
+      const orders = getOrdersFromCookies(state.userId) || [];
+      orders.push(action.payload);
+      saveOrdersToCookies(state.userId, orders);
     },
   },
 });
@@ -103,4 +138,3 @@ const cartSlice = createSlice({
 export const { addToCart, removeToCart, clearCart, setUserId, checkout } =
   cartSlice.actions;
 export default cartSlice.reducer;
-

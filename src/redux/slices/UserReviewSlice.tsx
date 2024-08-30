@@ -3,27 +3,27 @@ import {
   createAsyncThunk,
   PayloadAction,
   createSelector,
-} from "@reduxjs/toolkit";
-import axios from "axios";
-import { IReview, IReviewsState } from "../../utils/interface/interface";
+} from '@reduxjs/toolkit';
+import axios from 'axios';
+import { IReview, IReviewsState } from '../../utils/interface/Interface';
 
 const initialState: IReviewsState = {
   reviews: [],
   error: null,
 };
 
-const API_URL = "https://66cac6ec59f4350f064fdbf4.mockapi.io/Users";
+const API_URL = process.env.REACT_APP_USER_API_URL ?? '';
 
 export const fetchReviews = createAsyncThunk<
   IReview[],
   string,
   { rejectValue: string }
->("reviews/fetchReviews", async (productId, { rejectWithValue }) => {
+>('reviews/fetchReviews', async (productId, { rejectWithValue }) => {
   try {
     const response = await axios.get(`${API_URL}?productId=${productId}`);
     return response.data;
   } catch (error: any) {
-    return rejectWithValue(error.response?.data || "Failed to fetch reviews");
+    return rejectWithValue(error.response?.data || 'Failed to fetch reviews');
   }
 });
 
@@ -31,17 +31,17 @@ export const postReview = createAsyncThunk<
   IReview,
   IReview,
   { rejectValue: string }
->("reviews/postReview", async (review, { rejectWithValue }) => {
+>('reviews/postReview', async (review, { rejectWithValue }) => {
   try {
     const response = await axios.post(API_URL, review);
     return response.data;
   } catch (error: any) {
-    return rejectWithValue(error.response?.data || "Failed to post review");
+    return rejectWithValue(error.response?.data || 'Failed to post review');
   }
 });
 
 const reviewSlice = createSlice({
-  name: "reviews",
+  name: 'reviews',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
@@ -59,7 +59,7 @@ const reviewSlice = createSlice({
       .addCase(
         fetchReviews.rejected,
         (state, action: PayloadAction<string | undefined>) => {
-          state.error = action.payload ?? "Failed to fetch reviews";
+          state.error = action.payload ?? 'Failed to fetch reviews';
         }
       )
       .addCase(postReview.pending, (state) => {
@@ -75,7 +75,7 @@ const reviewSlice = createSlice({
       .addCase(
         postReview.rejected,
         (state, action: PayloadAction<string | undefined>) => {
-          state.error = action.payload ?? "Failed to post review";
+          state.error = action.payload ?? 'Failed to post review';
         }
       );
   },

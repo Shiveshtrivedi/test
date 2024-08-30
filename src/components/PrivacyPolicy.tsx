@@ -1,5 +1,5 @@
-import React from "react";
-import styled from "styled-components";
+import React from 'react';
+import styled from 'styled-components';
 
 const PrivacyPolicyContainer = styled.div`
   padding: 20px;
@@ -49,12 +49,11 @@ const PrivacyPolicy: React.FC = () => {
           We may collect and process the following types of information:
           <ul>
             <li>
-              Personal identification information name - shivesh trivedi ,phone - 7800525592.
+              Personal identification information name - shivesh trivedi ,phone
+              - 7800525592.
             </li>
-            <li>Usage data (  172.16.1.211, v8 engine).</li>
-            <li>
-              Payment information  credit card details, billing address.
-            </li>
+            <li>Usage data ( 172.16.1.211, v8 engine).</li>
+            <li>Payment information credit card details, billing address.</li>
           </ul>
         </Paragraph>
       </Section>

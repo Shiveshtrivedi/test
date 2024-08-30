@@ -1,9 +1,9 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
   saveWishlistToCookies,
   getWishlistFromCookies,
-} from "../../utils/CookieUtils";
-import { IWishListItem, IWishListState } from "../../utils/interface/interface";
+} from '../../utils/CookieUtils';
+import { IWishListItem, IWishListState } from '../../utils/interface/Interface';
 
 const initialState: IWishListState = {
   items: [],
@@ -11,7 +11,7 @@ const initialState: IWishListState = {
 };
 
 const wishListSlice = createSlice({
-  name: "wishList",
+  name: 'wishList',
   initialState,
   reducers: {
     setUserId(state, action: PayloadAction<string>) {
@@ -19,18 +19,14 @@ const wishListSlice = createSlice({
       state.items = getWishlistFromCookies(action.payload);
     },
     addToWishList(state, action: PayloadAction<IWishListItem>) {
-      console.log("add to wishlist", action.payload);
-      console.log("Current items in wishlist before find:", state.items);
       if (!state.userId) return;
       const existingItem = state.items.find(
         (item) => item.id === action.payload.id
       );
       if (!existingItem) {
-        state.items = [...state.items, action.payload]; // Immutable update
-        console.log("existing item", state.items);
+        state.items = [...state.items, action.payload];
+
         saveWishlistToCookies(state.userId, state.items);
-      } else {
-        console.log("item found");
       }
     },
     removeToWishList(state, action: PayloadAction<number>) {
